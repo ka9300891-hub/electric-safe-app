@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Electricity Saver</title><link rel="manifest" href="manifest.json"><meta name="theme-color" content="#1b8a3c"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f3faf4;--card:#fff;--tx:#14301c;--mut:#5d7565;--g:#1b8a3c;--gd:#136b2d;--gl:#e0f3e5;--w:#d97706;--wl:#fdf0d8;--r:#c62828;--bd:#d3e6d8;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0f1a13;--card:#18271d;--tx:#e6f3ea;--mut:#9ab3a2;--gl:#1d3a26;--wl:#3a2c10;--bd:#2b4333}}
+html{height:100%}body{margin:0;min-height:100%;background:var(--bg);color:var(--tx);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;padding-bottom:84px}
+body.ur{font-family:'Noto Nastaliq Urdu','Jameel Noori Nastaleeq',serif;line-height:2}
+header{background:var(--g);color:#fff;padding:16px;border-radius:0 0 22px 22px}
+header h1{margin:0;font-size:26px}header p{margin:2px 0 0;opacity:.92;font-size:14px}
+main{padding:14px;max-width:640px;margin:auto}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:14px;margin-bottom:12px}
+.card h2{margin:0 0 8px;font-size:18px;color:var(--g)}
+.big{font-size:30px;font-weight:700;color:var(--g)}.mut{color:var(--mut);font-size:13px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat{background:var(--gl);border-radius:14px;padding:12px}.stat b{display:block;font-size:22px}
+.bar{height:16px;background:var(--gl);border-radius:9px;overflow:hidden}.bar i{display:block;height:100%;background:var(--g)}
+.bar.w i{background:var(--w)}
+.warn{background:var(--wl);border:1px solid var(--w);border-radius:12px;padding:10px;margin:8px 0}
+.ok{background:var(--gl);border-radius:12px;padding:10px;margin:8px 0}
+.tag{display:inline-block;background:var(--wl);color:var(--w);border:1px solid var(--w);border-radius:8px;padding:1px 8px;font-size:12px;font-weight:700}
+label{display:block;font-size:13px;color:var(--mut);margin-top:8px}
+input,select{width:100%;box-sizing:border-box;font:inherit;padding:11px;border:1px solid var(--bd);border-radius:12px;background:var(--card);color:var(--tx)}
+.row{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.row label{margin-top:2px;font-size:11px}
+button{font:inherit;font-weight:700;border:0;border-radius:14px;padding:13px 16px;background:var(--g);color:#fff;width:100%;margin-top:10px;cursor:pointer}
+button.s{background:var(--gl);color:var(--gd);width:auto;padding:8px 12px;margin:3px;font-size:14px}
+button.d{background:var(--r)}button.x{width:auto;background:none;color:var(--r);padding:4px 8px;margin:0}
+.ap{border-top:1px solid var(--bd);padding:10px 0}.ap:first-of-type{border:0}
+.apt{display:flex;justify-content:space-between;align-items:center;font-weight:700}
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--bd);display:flex;overflow-x:auto;padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px))}
+nav a{flex:0 0 auto;min-width:64px;text-align:center;padding:4px 6px;font-size:11px;color:var(--mut);border-radius:12px;cursor:pointer}
+nav a span{display:block;font-size:22px}nav a.on{background:var(--gl);color:var(--gd);font-weight:700}
+.disc{font-size:12px;color:var(--mut);text-align:center;padding:8px 14px 20px}
+table{width:100%;border-collapse:collapse}td{padding:4px}
+img.pv{max-width:100%;border-radius:12px;margin-top:8px}
+.lang{display:flex;gap:8px}.lang button{margin-top:0}
+</style></head><body>
+<header><h1>⚡ Electricity Saver</h1><p id="sub"></p></header>
+<main id="app"></main>
+<div class="disc" id="disc"></div>
+<nav id="nav"></nav>
+<script>
+const KEY='bijliSaver1';
+const DEF=()=>({lang:'en',tab:'home',
+apps:[{n:'Fan',w:75,q:4,h:10,d:30},{n:'AC',w:1500,q:1,h:5,d:30},{n:'Refrigerator',w:150,q:1,h:12,d:30},{n:'TV',w:100,q:1,h:4,d:30},{n:'Washing Machine',w:400,q:1,h:1,d:12},{n:'Iron',w:1000,q:1,h:.5,d:15},{n:'Water Pump',w:750,q:1,h:1,d:30},{n:'Lights (LED)',w:15,q:8,h:6,d:30}],
+slabs:[{up:100,rate:10},{up:200,rate:15},{up:300,rate:22},{up:700,rate:30},{up:null,rate:38}],
+scan:{prev:'1200',curr:'1620',units:'',month:'September 2026',amount:'',slab:''},
+swap:{on:'Old AC',ow:1800,oh:8,nn:'Inverter AC',nw:900,nh:8,d:30,p:150000},
+solar:{units:null,bill:null,kw:5,cost:900000,gen:600}});
+let S;try{S=Object.assign(DEF(),JSON.parse(localStorage.getItem(KEY)||'{}'))}catch(e){S=DEF()}
+let img=null;
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const L=(a,b)=>S.lang==='ur'?b:a;
+const f=n=>Math.round(n).toLocaleString('en-US');
+const f1=n=>(Math.round(n*10)/10).toLocaleString('en-US');
+const R=n=>'Rs '+f(n);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const au=a=>a.w*a.q*a.h*a.d/1000;
+const tot=()=>S.apps.reduce((s,a)=>s+au(a),0);
+function bill(n){let b=0,lo=0;for(const s of S.slabs){const hi=s.up==null?Infinity:s.up;if(n>lo)b+=(Math.min(n,hi)-lo)*s.rate;lo=hi;if(n<=hi)break}return b}
+function slabIdx(n){const i=S.slabs.findIndex(s=>s.up==null||n<=s.up);return i<0?S.slabs.length-1:i}
+const PRE=[['Fan','پنکھا',75],['AC','اے سی',1500],['Refrigerator','فریج',150],['TV','ٹی وی',100],['Washing Machine','واشنگ مشین',400],['Iron','استری',1000],['Water Pump','واٹر پمپ',750],['Lights (LED)','لائٹس',15]];
+const TIPS=[
+[/\bac\b|air ?con|a\/c|اے ?سی/i,'Set AC to 26°C and use a fan with it. Clean filters monthly.','اے سی 26 ڈگری پر رکھیں اور ساتھ پنکھا چلائیں۔ فلٹر ہر ماہ صاف کریں۔',.12],
+[/fan|پنکھ/i,'Switch to an inverter (DC) fan: it can use about half the power.','انورٹر (ڈی سی) پنکھا لگائیں، تقریباً آدھی بجلی خرچ ہوتی ہے۔',.1],
+[/light|bulb|لائٹ/i,'Use LED bulbs and switch off lights in empty rooms.','ایل ای ڈی بلب استعمال کریں اور خالی کمرے کی لائٹ بند کریں۔',.2],
+[/iron|استری/i,'Iron clothes in one batch, not daily.','کپڑے روزانہ نہیں، ایک ساتھ استری کریں۔',.3],
+[/pump|motor|پمپ/i,'Fill the tank once; avoid running the pump repeatedly.','ٹینکی ایک بار بھریں، پمپ بار بار نہ چلائیں۔',.2],
+[/fridge|refrig|freezer|فریج/i,'Keep the fridge door shut, away from heat, and defrost regularly.','فریج کا دروازہ بند رکھیں، گرمی سے دور رکھیں، برف صاف کریں۔',.08],
+[/wash|واشنگ/i,'Wash full loads only and avoid hot water cycles.','پوری لوڈ پر دھوئیں اور گرم پانی سے بچیں۔',.2],
+[/\btv\b|television|ٹی ?وی/i,'Switch the TV off at the plug, not on standby.','ٹی وی اسٹینڈ بائی نہیں، بٹن سے بند کریں۔',.1]];
+const TABS=[['home','🏠','Home','ہوم'],['apps','🔌','Appliances','آلات'],['tariff','📊','Tariff','ٹیرف'],['tips','💡','Tips','مشورے'],['scan','📷','Scan Bill','بل اسکین'],['swap','🔄','Smart Swap','تبدیلی'],['solar','☀️','Solar','سولر'],['set','⚙️','Settings','سیٹنگ']];
+
+function savings(){let sv=0;S.apps.forEach(a=>{const t=TIPS.find(x=>x[0].test(a.n));if(t)sv+=au(a)*t[3]});const n=tot();return{units:sv,money:bill(n)-bill(Math.max(0,n-sv))}}
+function topList(){return[...S.apps].sort((a,b)=>au(b)-au(a))}
+
+function progress(n){const i=slabIdx(n),sl=S.slabs[i],lo=i?S.slabs[i-1].up:0,nx=S.slabs[i+1];let prog='',w='';
+if(sl.up!=null){const left=sl.up-n,span=Math.max(1,sl.up-lo),p=Math.min(100,Math.max(0,(n-lo)/span*100)),near=left<=Math.max(20,sl.up*.1);
+prog=`<div class="bar ${near?'w':''}"><i style="width:${p}%"></i></div><div class="mut">${f(n)} / ${f(sl.up)} ${L('units','یونٹ')} (${f(left)} ${L('left','باقی')})</div>`;
+if(near&&nx)w=`<div class="warn">⚠️ ${L(`Only ${f(left)} units before you reach the next slab (Rs ${sl.rate} → Rs ${nx.rate} per unit).`,`اگلے سلیب تک صرف ${f(left)} یونٹ باقی ہیں (Rs ${sl.rate} ← Rs ${nx.rate} فی یونٹ)۔`)}</div>`}
+else prog=`<div class="mut">${L('You are in the highest slab.','آپ سب سے اونچے سلیب میں ہیں۔')}</div>`;
+return [prog,w]}
+function home(){const n=tot(),b=bill(n),i=slabIdx(n),sl=S.slabs[i],lo=i?S.slabs[i-1].up:0,nx=S.slabs[i+1],sv=savings(),t=topList()[0];
+const pg=progress(n);const prog=pg[0],w=pg[1];
+return `<div class="card"><div class="mut">${L('Estimated monthly bill','متوقع ماہانہ بل')} <span class="tag">${L('SAMPLE RATES','نمونہ ریٹ')}</span></div><div class="big">${R(b)}</div><div class="mut">${f(n)} ${L('units / month','یونٹ / ماہ')}</div></div>
+<div class="grid"><div class="stat">${L('Units','یونٹ')}<b>${f(n)}</b></div><div class="stat">${L('Current slab','موجودہ سلیب')}<b>#${i+1} · Rs ${sl.rate}</b></div>
+<div class="stat">${L('Possible saving','ممکنہ بچت')}<b>${R(sv.money)}</b><span class="mut">${f(sv.units)} ${L('units','یونٹ')}</span></div>
+<div class="stat">${L('Costliest appliance','سب سے مہنگا آلہ')}<b>${t?esc(t.n):'-'}</b><span class="mut">${t?f(au(t)):0} ${L('units','یونٹ')}</span></div></div>
+<div class="card" style="margin-top:12px"><h2>${L('Progress to next slab','اگلے سلیب تک')}</h2>${prog}${w}</div>
+<div class="card"><h2>${L('Top 3 consumers','سب سے زیادہ خرچ')}</h2>${bars(topList().slice(0,3))}</div>
+<button onclick="go('apps')">${L('Edit appliances','آلات تبدیل کریں')}</button>`}
+
+function bars(list){const n=tot()||1;return list.map(a=>`<div style="margin:8px 0"><div class="apt"><span>${esc(a.n)}</span><span>${f1(au(a))} ${L('u','یونٹ')} · ${R(bill(n)*au(a)/n)}</span></div><div class="bar"><i style="width:${au(a)/n*100}%"></i></div></div>`).join('')}
+
+function apps(){const n=tot(),b=bill(n);
+return `<div class="card"><h2>${L('Add appliance','آلہ شامل کریں')}</h2><div>${PRE.map((p,i)=>`<button class="s" onclick="pre(${i})">${L(p[0],p[1])}</button>`).join('')}</div>
+<label>${L('Name','نام')}</label><input id="an" placeholder="${L('e.g. Fan','مثلاً پنکھا')}">
+<div class="row"><div><label>${L('Watts','واٹ')}</label><input id="aw" type="number" min="0"></div><div><label>${L('Qty','تعداد')}</label><input id="aq" type="number" min="1" value="1"></div><div><label>${L('Hrs/day','گھنٹے/دن')}</label><input id="ah" type="number" min="0" step=".5"></div><div><label>${L('Days/mo','دن/ماہ')}</label><input id="ad" type="number" min="0" max="31" value="30"></div></div>
+<button onclick="addApp()">＋ ${L('Add','شامل کریں')}</button></div>
+<div class="card"><h2>${L('My appliances','میرے آلات')}</h2>${S.apps.map((a,i)=>`<div class="ap"><div class="apt"><span>${esc(a.n)}</span><span>${f1(au(a))} ${L('units','یونٹ')} · ${R(n?b*au(a)/n:0)}</span><button class="x" onclick="del(${i})">✕</button></div>
+<div class="row">${[['w',L('Watts','واٹ')],['q',L('Qty','تعداد')],['h',L('Hrs/day','گھنٹے')],['d',L('Days','دن')]].map(([k,l])=>`<div><label>${l}</label><input type="number" min="0" step="any" value="${a[k]}" onchange="upd(${i},'${k}',this.value)"></div>`).join('')}</div></div>`).join('')||`<p class="mut">${L('No appliances yet.','ابھی کوئی آلہ نہیں۔')}</p>`}
+<div class="ok"><b>${L('Total','کل')}: ${f1(n)} ${L('units/month','یونٹ/ماہ')} · ${R(b)}</b><div class="mut">${L('Units = watts × qty × hours/day × days/month ÷ 1000','یونٹ = واٹ × تعداد × گھنٹے/دن × دن/ماہ ÷ 1000')}</div></div></div>`}
+
+function tariff(){const n=tot();const i=slabIdx(n);
+return `<div class="card"><h2>${L('Tariff slabs','ٹیرف سلیب')} <span class="tag">${L('SAMPLE RATES – not official','نمونہ ریٹ – سرکاری نہیں')}</span></h2>
+<p class="mut">${L('Enter the rates printed on your own bill. Each unit is charged at the rate of the band it falls in.','اپنے بل پر چھپے ریٹ درج کریں۔ ہر یونٹ اپنے بینڈ کے ریٹ پر چارج ہوتا ہے۔')}</p>
+<table><tr class="mut"><td>#</td><td>${L('Up to units','یونٹ تک')}</td><td>${L('Rs / unit','روپے / یونٹ')}</td></tr>
+${S.slabs.map((s,k)=>`<tr style="${k===i?'background:var(--gl)':''}"><td>${k+1}</td><td>${s.up==null?'∞':`<input type="number" value="${s.up}" onchange="slab(${k},'up',this.value)">`}</td><td><input type="number" step=".01" value="${s.rate}" onchange="slab(${k},'rate',this.value)"></td></tr>`).join('')}</table>
+<button class="s" onclick="addSlab()">＋ ${L('Add slab','سلیب شامل کریں')}</button><button class="s" onclick="delSlab()">− ${L('Remove last','آخری ہٹائیں')}</button></div>
+<div class="card"><h2>${L('Your position','آپ کی پوزیشن')}</h2>${progress(n).join('')}<div class="ok">${f(n)} ${L('units','یونٹ')} → ${R(bill(n))}</div></div>`}
+
+function tips(){const t=topList(),list=[];
+S.apps.forEach(a=>{const x=TIPS.find(x=>x[0].test(a.n));if(x&&!list.includes(x))list.push(x)});
+list.push([0,'Unplug chargers and devices not in use; use the washing machine and pump outside peak hours.','استعمال میں نہ ہو تو چارجر نکال دیں؛ واشنگ مشین اور پمپ پیک اوقات کے بعد چلائیں۔']);
+return `<div class="card"><h2>${L('Costly appliances (most units first)','مہنگے آلات (زیادہ یونٹ پہلے)')}</h2>${bars(t)}${t[0]?`<div class="warn">🔥 ${L(`${esc(t[0].n)} uses the most: ${f(au(t[0]))} units/month.`,`${esc(t[0].n)} سب سے زیادہ ${f(au(t[0]))} یونٹ/ماہ خرچ کرتا ہے۔`)}</div>`:''}</div>
+<div class="card"><h2>${L('Saving tips for you','آپ کے لیے مشورے')}</h2>${list.map(x=>`<div class="ok">💡 ${L(x[1],x[2])}</div>`).join('')}</div>`}
+
+function scan(){const s=S.scan,u=s.units||(s.curr&&s.prev?s.curr-s.prev:''),est=tot();
+const fld=(k,l,t='text')=>`<label>${l}</label><input type="${t}" value="${esc(s[k])}" onchange="sc('${k}',this.value)">`;
+return `<div class="card"><h2>${L('Bill photo scan','بل کی تصویر')}</h2><span class="tag">${L('Demo / manual entry','ڈیمو / دستی اندراج')}</span>
+<p class="mut">${L('OCR is NOT enabled in this prototype. Upload a photo to keep it beside the form, then type the values from your bill.','اس پروٹوٹائپ میں OCR فعال نہیں۔ تصویر اپ لوڈ کریں اور بل سے ویلیوز خود لکھیں۔')}</p>
+<input type="file" accept="image/*" onchange="pick(this)">${img?`<img class="pv" src="${img}" alt="bill">`:''}</div>
+<div class="card"><h2>${L('Bill details (manual)','بل کی تفصیل (دستی)')}</h2>${fld('prev',L('Previous reading','پچھلی ریڈنگ'),'number')}${fld('curr',L('Current reading','موجودہ ریڈنگ'),'number')}${fld('units',L('Units (blank = auto)','یونٹ (خالی = خود بخود)'),'number')}${fld('month',L('Billing month','بل کا مہینہ'))}${fld('amount',L('Amount (PKR)','رقم (روپے)'),'number')}${fld('slab',L('Tariff / slab info','ٹیرف / سلیب'))}
+${u?`<div class="ok">${L('Bill units','بل کے یونٹ')}: <b>${f(u)}</b> · ${L('App estimate','ایپ تخمینہ')}: <b>${f(est)}</b> (${u-est>=0?'+':''}${f(u-est)})<br>${L('Sample-tariff cost for bill units','نمونہ ٹیرف پر بل')}: ${R(bill(u))}</div>
+<button onclick="useU(${u})">${L('Use these units in Solar calculator','یہ یونٹ سولر میں استعمال کریں')}</button>`:''}</div>`}
+
+function swap(){const w=S.swap,ou=w.ow*w.oh*w.d/1000,nu=w.nw*w.nh*w.d/1000,sv=ou-nu,n=tot(),m=Math.max(0,bill(n)-bill(Math.max(0,n-sv))),pb=m>0?w.p/m:null;
+const fl=(k,l,t='number')=>`<div><label>${l}</label><input type="${t}" step="any" value="${esc(w[k])}" onchange="sw('${k}',this.value,${t==='number'})"></div>`;
+return `<div class="card"><h2>${L('Smart Swap','سمارٹ سواپ')}</h2><div class="grid">${fl('on',L('Old appliance','پرانا آلہ'),'text')}${fl('nn',L('New appliance','نیا آلہ'),'text')}${fl('ow',L('Old watts','پرانے واٹ'))}${fl('nw',L('New watts','نئے واٹ'))}${fl('oh',L('Old hrs/day','پرانے گھنٹے/دن'))}${fl('nh',L('New hrs/day','نئے گھنٹے/دن'))}${fl('d',L('Days/month','دن/ماہ'))}${fl('p',L('New appliance price (PKR)','نئے آلے کی قیمت'))}</div></div>
+<div class="card"><h2>${L('Result (estimate)','نتیجہ (تخمینہ)')}</h2><div class="grid"><div class="stat">${esc(w.on)}<b>${f1(ou)} ${L('u','یونٹ')}</b></div><div class="stat">${esc(w.nn)}<b>${f1(nu)} ${L('u','یونٹ')}</b></div><div class="stat">${L('Units saved','یونٹ بچت')}<b>${f1(sv)}</b></div><div class="stat">${L('Saving / month','ماہانہ بچت')}<b>${R(m)}</b></div></div>
+<div class="${pb?'ok':'warn'}">${pb?L(`Payback: about ${f1(pb)} months (${f1(pb/12)} years).`,`واپسی مدت: تقریباً ${f1(pb)} ماہ (${f1(pb/12)} سال)۔`):L('No saving, so no payback.','بچت نہیں، لہٰذا واپسی نہیں۔')}</div></div>`}
+
+function solar(){const o=S.solar,u=o.units??Math.round(tot()),b=o.bill??Math.round(bill(u)),grid=Math.max(0,u-o.gen),nb=bill(grid),sv=Math.max(0,b-nb),pb=sv>0?o.cost/sv:null;
+const fl=(k,l,v)=>`<label>${l}</label><input type="number" step="any" value="${v}" onchange="so('${k}',this.value)">`;
+return `<div class="card"><h2>${L('Solar calculator','سولر کیلکولیٹر')} <span class="tag">${L('ESTIMATES','تخمینے')}</span></h2>${fl('units',L('Current monthly units','موجودہ ماہانہ یونٹ'),u)}${fl('bill',L('Current monthly bill (PKR)','موجودہ ماہانہ بل'),b)}${fl('kw',L('System size (kW)','سسٹم سائز (kW)'),o.kw)}${fl('cost',L('System cost (PKR)','سسٹم کی لاگت'),o.cost)}${fl('gen',L('Est. monthly generation (units)','متوقع ماہانہ پیداوار (یونٹ)'),o.gen)}
+<p class="mut">${L('Rule of thumb: ~100–150 units per kW per month, depending on sun, season and shading.','اندازہ: فی kW ماہانہ تقریباً 100 تا 150 یونٹ، دھوپ اور موسم پر منحصر۔')}</p>
+<button class="s" onclick="so('gen',S.solar.kw*120)">${L('Estimate generation = kW × 120','پیداوار = kW × 120')}</button></div>
+<div class="card"><h2>${L('Result (estimates)','نتیجہ (تخمینے)')}</h2><div class="grid"><div class="stat">${L('Grid units after solar','سولر کے بعد گرڈ یونٹ')}<b>${f(grid)}</b></div><div class="stat">${L('Bill after solar','سولر کے بعد بل')}<b>${R(nb)}</b></div><div class="stat">${L('Saving / month','ماہانہ بچت')}<b>${R(sv)}</b></div><div class="stat">${L('Payback','واپسی مدت')}<b>${pb?f1(pb/12)+' '+L('yrs','سال'):'-'}</b></div></div>
+<div class="mut" style="margin-top:8px">${L('Ignores net-metering rules, export rates, degradation and battery costs. Based on sample tariff.','نیٹ میٹرنگ، ایکسپورٹ ریٹ، پینل کی کمزوری اور بیٹری کی لاگت شامل نہیں۔ نمونہ ٹیرف پر مبنی۔')}</div></div>`}
+
+function set(){return `<div class="card"><h2>${L('Language','زبان')}</h2><div class="lang"><button class="${S.lang==='en'?'':'s'}" onclick="lang('en')">English</button><button class="${S.lang==='ur'?'':'s'}" onclick="lang('ur')">اردو</button></div></div>
+<div class="card"><h2>${L('Currency','کرنسی')}</h2><div class="ok">PKR (Rs)</div></div>
+<div class="card"><h2>${L('Tariff rates','ٹیرف ریٹ')}</h2><button onclick="go('tariff')">${L('Edit tariff slabs','ٹیرف سلیب تبدیل کریں')}</button></div>
+<div class="card"><h2>${L('Reset data','ڈیٹا ری سیٹ')}</h2><button class="d" onclick="if(confirm('${L('Reset everything to sample data?','سب کچھ نمونہ ڈیٹا پر ری سیٹ کریں؟')}')){S=DEF();img=null;save();draw()}">${L('Reset to sample data','نمونہ ڈیٹا پر واپس')}</button></div>`}
+
+const V={home,apps,tariff,tips,scan,swap,solar,set};
+function draw(){const ur=S.lang==='ur';document.documentElement.dir=ur?'rtl':'ltr';document.documentElement.lang=ur?'ur':'en';document.body.classList.toggle('ur',ur);
+document.getElementById('sub').textContent=L('Know your electricity bill before it shocks you','بل آنے سے پہلے اپنا بجلی کا بل جانیں');
+document.getElementById('disc').textContent=L('Electricity Saver provides estimates. Actual bills may differ because of taxes, fixed charges, adjustments, subsidies, and the applicable tariff.','الیکٹرسٹی سیور صرف تخمینے دیتا ہے۔ اصل بل ٹیکس، فکسڈ چارجز، ایڈجسٹمنٹ، سبسڈی اور لاگو ٹیرف کی وجہ سے مختلف ہو سکتا ہے۔');
+document.getElementById('nav').innerHTML=TABS.map(t=>`<a class="${S.tab===t[0]?'on':''}" onclick="go('${t[0]}')"><span>${t[1]}</span>${L(t[2],t[3])}</a>`).join('');
+document.getElementById('app').innerHTML=V[S.tab]();}
+function go(t){S.tab=t;save();draw();scrollTo(0,0)}
+function lang(l){S.lang=l;save();draw()}
+function pre(i){const p=PRE[i];an.value=L(p[0],p[1]);aw.value=p[2];ah.value=i==1?5:i==2?12:4;if(i==2)ad.value=30;}
+function addApp(){const n=an.value.trim(),w=+aw.value,q=+aq.value,h=+ah.value,d=+ad.value;if(!n||!(w>0)||!(q>0)||!(h>=0)||!(d>=0)){alert(L('Please enter name, watts, quantity, hours and days.','نام، واٹ، تعداد، گھنٹے اور دن درج کریں۔'));return}
+S.apps.push({n,w,q,h,d});save();draw()}
+function del(i){S.apps.splice(i,1);save();draw()}
+function upd(i,k,v){S.apps[i][k]=Math.max(0,+v||0);save();draw()}
+function slab(k,f2,v){S.slabs[k][f2]=Math.max(0,+v||0);S.slabs.sort((a,b)=>(a.up==null?1e12:a.up)-(b.up==null?1e12:b.up));save();draw()}
+function addSlab(){const l=S.slabs.length-1,p=l?S.slabs[l-1].up:0;S.slabs.splice(l,0,{up:p+100,rate:S.slabs[l].rate});save();draw()}
+function delSlab(){if(S.slabs.length>2){S.slabs.splice(S.slabs.length-2,1);save();draw()}}
+function sc(k,v){S.scan[k]=v;save();draw()}
+function pick(el){const fl=el.files[0];if(fl){img=URL.createObjectURL(fl);draw()}}
+function useU(u){S.solar.units=+u;S.solar.bill=Math.round(bill(+u));save();go('solar')}
+function sw(k,v,num){S.swap[k]=num?(+v||0):v;save();draw()}
+function so(k,v){S.solar[k]=+v||0;save();draw()}
+draw();
+if('serviceWorker' in navigator){addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
+</script></body></html>
